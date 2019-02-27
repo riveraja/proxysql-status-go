@@ -106,7 +106,7 @@ func main() {
 
 	fmt.Println("\n########## ProxySQL MySQL Servers ##########")
 
-	srows, err := db.Query("select hostgroup_id,hostname,port,weight,compression,max_connections,max_replication_lag,useSSL,max_latency_ms,comment from mysql_servers order by hostgroup_id")
+	srows, err := db.Query("select hostgroup_id,hostname,port,weight,compression,max_connections,max_replication_lag,use_ssl,max_latency_ms,comment from mysql_servers order by hostgroup_id")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -127,7 +127,7 @@ func main() {
 
 	fmt.Println("\n########## ProxySQL MySQL Users ##########")
 
-	irows, err := db.Query("select username,active useSSL,default_hostgroup,default_schema,schemaLocked,transaction_persistent,fast_forward,backend,frontend,max_connections from mysql_users")
+	irows, err := db.Query("select username,active useSSL,default_hostgroup,default_schema,schema_locked,transaction_persistent,fast_forward,backend,frontend,max_connections from mysql_users")
 	if err != nil {
 		panic(err)
 	}
