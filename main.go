@@ -204,6 +204,12 @@ func main() {
 		fmt.Printf("\nArg5:           %s", narg5)
 		fmt.Printf("\nComment:        %s", comment)
 	}
+
+	fmt.Println("\n########## MySQL Replication Hostgroups ##########")
+
+	fmt.Println("\n########## MySQL Group Replication Hostgroups ##########")
+
+	fmt.Println("\n########## MySQL Query Rules ##########")
 	fmt.Println("\n#### End ####")
 	//#### Cleanup Section ####
 	//os.Remove("./statusfile.txt")
