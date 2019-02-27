@@ -155,7 +155,7 @@ func main() {
 
 	fmt.Println("\n########## ProxySQL Scheduler ##########")
 
-	sched, err := db.Query("select id, active, intervalMS, filename, arg1, arg2, arg3, arg4, arg5, comment from scheduler")
+	sched, err := db.Query("select id, active, interval_ms, filename, arg1, arg2, arg3, arg4, arg5, comment from scheduler")
 	if err != nil {
 		panic(err)
 	}
