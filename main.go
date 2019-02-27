@@ -140,7 +140,7 @@ func main() {
 		var defSchema sql.NullString
 		var ndefSchema string
 		var active, useSSL, schemaLocked, trxPersistent, fastFWD, backend, frontend, maxconn int
-		if err := irows.Scan(&uname, &active, useSSL, &defHG, &defSchema, &schemaLocked, &trxPersistent, &fastFWD, &backend, &frontend, &maxconn); err != nil {
+		if err := irows.Scan(&uname, &active, &useSSL, &defHG, &defSchema, &schemaLocked, &trxPersistent, &fastFWD, &backend, &frontend, &maxconn); err != nil {
 			panic(err)
 		}
 		if defSchema.Valid {
