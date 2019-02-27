@@ -127,7 +127,7 @@ func main() {
 
 	fmt.Println("\n########## ProxySQL MySQL Users ##########")
 
-	irows, err := db.Query("select username,active useSSL,default_hostgroup,default_schema,schema_locked,transaction_persistent,fast_forward,backend,frontend,max_connections from mysql_users")
+	irows, err := db.Query("select username,active,use_ssl,default_hostgroup,default_schema,schema_locked,transaction_persistent,fast_forward,backend,frontend,max_connections from mysql_users")
 	if err != nil {
 		panic(err)
 	}
