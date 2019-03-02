@@ -106,21 +106,21 @@ func main() {
 
 	fmt.Println("\n########## ProxySQL MySQL Servers ##########")
 
-	srows, err := db.Query("select hostgroup_id,hostname,port,weight,compression,max_connections,max_replication_lag,use_ssl,max_latency_ms,comment from mysql_servers order by hostgroup_id")
+	srows, err := db.Query("select hostgroup_id,hostname,port,status,weight,compression,max_connections,max_replication_lag,use_ssl,max_latency_ms,comment from mysql_servers order by hostgroup_id")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer srows.Close()
 
 	t := tabby.New()
-	t.AddHeader("HG", "Hostname", "Port", "Weight", "Compression", "Max Conn", "Max Repl Lag", "Use SSL", "Max Latency", "Comment")
+	t.AddHeader("HG", "Hostname", "Port", "Status", "Weight", "Compression", "Max Conn", "Max Repl Lag", "Use SSL", "Max Latency", "Comment")
 	for srows.Next() {
 		var hid, port, wt, comp, maxcon, maxrepl, usessl, maxlat int
-		var hname, comment string
-		if err := srows.Scan(&hid, &hname, &port, &wt, &comp, &maxcon, &maxrepl, &usessl, &maxlat, &comment); err != nil {
+		var hname, status, comment string
+		if err := srows.Scan(&hid, &hname, &port, &st, &wt, &comp, &maxcon, &maxrepl, &usessl, &maxlat, &comment); err != nil {
 			panic(err)
 		}
-		t.AddLine(hid, hname, port, wt, comp, maxcon, maxrepl, usessl, maxlat, comment)
+		t.AddLine(hid, hname, port, st, wt, comp, maxcon, maxrepl, usessl, maxlat, comment)
 	}
 
 	t.Print()
