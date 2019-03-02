@@ -116,7 +116,7 @@ func main() {
 	t.AddHeader("HG", "Hostname", "Port", "Status", "Weight", "Compression", "Max Conn", "Max Repl Lag", "Use SSL", "Max Latency", "Comment")
 	for srows.Next() {
 		var hid, port, wt, comp, maxcon, maxrepl, usessl, maxlat int
-		var hname, status, comment string
+		var hname, st, comment string
 		if err := srows.Scan(&hid, &hname, &port, &st, &wt, &comp, &maxcon, &maxrepl, &usessl, &maxlat, &comment); err != nil {
 			panic(err)
 		}
