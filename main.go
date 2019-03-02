@@ -207,6 +207,25 @@ func main() {
 
 	fmt.Println("\n########## MySQL Replication Hostgroups ##########")
 
+	rhg, err := db.Query("select * from mysql_replication_hostgroups")
+	if err != nil {
+		panic(err)
+	}
+	defer rhg.Close()
+
+	s := tabby.New()
+	s.AddHeader("Writer HG", "Reader HG", "Comment")
+	for rhg.Next() {
+		var writehg, readhg int
+		var comment string
+		if err := rhg.Scan(&writehg, &readhg, &comment); err != nil {
+			panic(err)
+		}
+		s.AddLine(writehg, readhg, comment)
+	}
+
+	s.Print()
+
 	fmt.Println("\n########## MySQL Group Replication Hostgroups ##########")
 
 	fmt.Println("\n########## MySQL Query Rules ##########")
