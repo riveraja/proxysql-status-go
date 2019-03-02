@@ -228,7 +228,25 @@ func main() {
 
 	fmt.Println("\n########## MySQL Group Replication Hostgroups ##########")
 
+	grhg, err := db.Query("select * from mysql_group_replication_hostgroups")
+	if err != nil {
+		panic(err)
+	}
+
+	g := tabby.New()
+	g.AddHeader("Writer HG", "Backup Writer HG", "Reader HG", "Offline HG", "Active", "Max Writers", "Writer is reader", "Max Trx Behind", "Comment")
+	for grhg.Next() {
+		var writehg, bkwritehg, readerhg, offlinehg, active, maxwriters, wrrd, maxtrx int
+		var comment string
+		if err := grhg.Scan(&writehg, &bkwritehg, &readerhg, &offlinehg, &active, &maxwriters, &wrrd, &maxtrx, &comment); err != nil {
+			panic(err)
+		}
+		g.AddLine(writehg, bkwritehg, readerhg, offlinehg, active, maxwriters, wrrd, maxtrx, comment)
+	}
+	g.Print()
+
 	fmt.Println("\n########## MySQL Query Rules ##########")
+
 	fmt.Println("\n#### End ####")
 	//#### Cleanup Section ####
 	//os.Remove("./statusfile.txt")
