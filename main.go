@@ -232,6 +232,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	defer grhg.Close()
 
 	g := tabby.New()
 	g.AddHeader("Writer HG", "Backup Writer HG", "Reader HG", "Offline HG", "Active", "Max Writers", "Writer is reader", "Max Trx Behind", "Comment")
@@ -246,6 +247,24 @@ func main() {
 	g.Print()
 
 	fmt.Println("\n########## MySQL Query Rules ##########")
+
+	qr, err := db.Query("select * from mysql_query_rules")
+	if err != nil {
+		panic(err)
+	}
+	defer qr.Close()
+
+	q := tabby.New()
+	q.AddHeader("RuleID", "Active", "User", "Schema", "FlagIN", "ClientAddr", "ProxyAddr", "ProxyPort", "Digest", "MatchDigest", "MatchPattern", "NegatePattern", "ReMods", "FlagOUT", "ReplacePattern", "DestHG", "CacheTTL", "Reconnect", "Timeout", "Retries", "Delay", " NextQryFlagIN", "MirrorFlagOUT", "MirrorHG", "ErrorMsg", "OKMsg", "StickyConn", "Multiplex", "Log", "Apply", "Comment")
+	for qr.Next() {
+		var ruleID, actve, flagIN, proxyPort, nmatchPattern, flagOut, destHg, cacheTTL, reconn, timeOut, retries, delay, nQryFlagIn, mirrorFlagOut, mirrorHg, stickyConn, mpx, mlog, mapply int
+		var userName, schemaName, clientAddr, proxyAddr, digest, matchDigest, matchPattern, reMods, replacePattern, errMsg, okMsg, mcomment string
+		if err := qr.Scan(&ruleID, &actve, &userName, &schemaName, &flagIN, &clientAddr, &proxyAddr, &proxyPort, &digest, &matchDigest, &matchPattern, &nmatchPattern, &reMods, &flagOut, &replacePattern, &destHg, &cacheTTL, &reconn, &timeOut, &retries, &delay, &nQryFlagIn, &mirrorFlagOut, &mirrorHg, &errMsg, &okMsg, &stickyConn, &mpx, &mlog, &mapply, &mcomment); err != nil {
+			panic(err)
+		}
+		q.AddLine(ruleID, actve, userName, schemaName, flagIN, clientAddr, proxyAddr, proxyPort, digest, matchDigest, matchPattern, nmatchPattern, reMods, flagOut, replacePattern, destHg, cacheTTL, reconn, timeOut, retries, delay, nQryFlagIn, mirrorFlagOut, mirrorHg, errMsg, okMsg, stickyConn, mpx, mlog, mapply, mcomment)
+	}
+	q.Print()
 
 	fmt.Println("\n#### End ####")
 	//#### Cleanup Section ####
