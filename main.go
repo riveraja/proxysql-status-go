@@ -255,14 +255,45 @@ func main() {
 	defer qr.Close()
 
 	q := tabby.New()
-	q.AddHeader("RuleID", "Active", "User", "Schema", "FlagIN", "ClientAddr", "ProxyAddr", "ProxyPort", "Digest", "MatchDigest", "MatchPattern", "NegatePattern", "ReMods", "FlagOUT", "ReplacePattern", "DestHG", "CacheTTL", "Reconnect", "Timeout", "Retries", "Delay", " NextQryFlagIN", "MirrorFlagOUT", "MirrorHG", "ErrorMsg", "OKMsg", "StickyConn", "Multiplex", "Log", "Apply", "Comment")
+	q.AddHeader("RuleID", "Active", "User", "Schema", "Digest", "MatchDigest", "MatchPattern", "NegatePattern", "ReplacePattern", "DestHG", "Apply", "Comment")
 	for qr.Next() {
-		var ruleID, actve, flagIN, proxyPort, nmatchPattern, flagOut, destHg, cacheTTL, reconn, timeOut, retries, delay, nQryFlagIn, mirrorFlagOut, mirrorHg, stickyConn, mpx, mlog, mapply int
-		var userName, schemaName, clientAddr, proxyAddr, digest, matchDigest, matchPattern, reMods, replacePattern, errMsg, okMsg, mcomment string
-		if err := qr.Scan(&ruleID, &actve, &userName, &schemaName, &flagIN, &clientAddr, &proxyAddr, &proxyPort, &digest, &matchDigest, &matchPattern, &nmatchPattern, &reMods, &flagOut, &replacePattern, &destHg, &cacheTTL, &reconn, &timeOut, &retries, &delay, &nQryFlagIn, &mirrorFlagOut, &mirrorHg, &errMsg, &okMsg, &stickyConn, &mpx, &mlog, &mapply, &mcomment); err != nil {
+		var ruleID, actve, nmatchPattern, destHg, mapply int
+		var userName, schemaName, digest, matchDigest, matchPattern, replacePattern, mcomment string
+		var schemaNamex, digestx, matchDigestx, matchPatternx, replacePatternx, mcommentx sql.NullString
+		if err := qr.Scan(&ruleID, &actve, &userName, &schemaNamex, &digestx, &matchDigestx, &matchPatternx, &nmatchPattern, &replacePatternx, &destHg, &mapply, &mcommentx); err != nil {
 			panic(err)
 		}
-		q.AddLine(ruleID, actve, userName, schemaName, flagIN, clientAddr, proxyAddr, proxyPort, digest, matchDigest, matchPattern, nmatchPattern, reMods, flagOut, replacePattern, destHg, cacheTTL, reconn, timeOut, retries, delay, nQryFlagIn, mirrorFlagOut, mirrorHg, errMsg, okMsg, stickyConn, mpx, mlog, mapply, mcomment)
+		if schemaNamex.Valid {
+			schemaName = schemaNamex.String
+		} else {
+			schemaName = "NULL"
+		}
+		if digestx.Valid {
+			digest = digestx.String
+		} else {
+			digest = "NULL"
+		}
+		if matchDigestx.Valid {
+			matchDigest = matchDigestx.String
+		} else {
+			matchDigest = "NULL"
+		}
+		if matchPatternx.Valid {
+			matchPattern = matchDigestx.String
+		} else {
+			matchPattern = "NULL"
+		}
+		if replacePatternx.Valid {
+			replacePattern = replacePatternx.String
+		} else {
+			replacePattern = "NULL"
+		}
+		if mcommentx.Valid {
+			mcomment = mcommentx.String
+		} else {
+			mcomment = "NULL"
+		}
+		q.AddLine(ruleID, actve, userName, schemaName, digest, matchDigest, matchPattern, nmatchPattern, replacePattern, destHg, mapply, mcomment)
 	}
 	q.Print()
 
