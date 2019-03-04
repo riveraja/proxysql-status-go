@@ -106,7 +106,7 @@ func main() {
 
 	fmt.Println("\n########## ProxySQL MySQL Servers ##########")
 
-	srows, err := db.Query("select hostgroup_id,hostname,port,status,weight,compression,max_connections,max_replication_lag,use_ssl,max_latency_ms,comment from mysql_servers order by hostgroup_id")
+	srows, err := db.Query("select hostgroup_id,hostname,port,status,weight,compression,max_connections,max_replication_lag,use_ssl,max_latency_ms,comment from runtime_mysql_servers order by hostgroup_id")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -127,7 +127,7 @@ func main() {
 
 	fmt.Println("\n########## ProxySQL MySQL Users ##########")
 
-	irows, err := db.Query("select username,active,use_ssl,default_hostgroup,default_schema,schema_locked,transaction_persistent,fast_forward,backend,frontend,max_connections from mysql_users")
+	irows, err := db.Query("select username,active,use_ssl,default_hostgroup,default_schema,schema_locked,transaction_persistent,fast_forward,backend,frontend,max_connections from runtime_mysql_users")
 	if err != nil {
 		panic(err)
 	}
@@ -155,7 +155,7 @@ func main() {
 
 	fmt.Println("\n########## ProxySQL Scheduler ##########")
 
-	sched, err := db.Query("select id, active, interval_ms, filename, arg1, arg2, arg3, arg4, arg5, comment from scheduler")
+	sched, err := db.Query("select id, active, interval_ms, filename, arg1, arg2, arg3, arg4, arg5, comment from runtime_scheduler")
 	if err != nil {
 		panic(err)
 	}
@@ -207,7 +207,7 @@ func main() {
 
 	fmt.Println("\n########## MySQL Replication Hostgroups ##########")
 
-	rhg, err := db.Query("select * from mysql_replication_hostgroups")
+	rhg, err := db.Query("select * from runtime_mysql_replication_hostgroups")
 	if err != nil {
 		panic(err)
 	}
@@ -228,7 +228,7 @@ func main() {
 
 	fmt.Println("\n########## MySQL Group Replication Hostgroups ##########")
 
-	grhg, err := db.Query("select * from mysql_group_replication_hostgroups")
+	grhg, err := db.Query("select * from runtime_mysql_group_replication_hostgroups")
 	if err != nil {
 		panic(err)
 	}
@@ -248,7 +248,7 @@ func main() {
 
 	fmt.Println("\n########## MySQL Query Rules ##########")
 
-	qr, err := db.Query("select rule_id,active,username,schemaname,digest,match_digest,match_pattern,negate_match_pattern,replace_pattern,destination_hostgroup,apply,comment from mysql_query_rules")
+	qr, err := db.Query("select rule_id,active,username,schemaname,digest,match_digest,match_pattern,negate_match_pattern,replace_pattern,destination_hostgroup,apply,comment from runtime_mysql_query_rules")
 	if err != nil {
 		panic(err)
 	}
