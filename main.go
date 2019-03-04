@@ -248,7 +248,7 @@ func main() {
 
 	fmt.Println("\n########## MySQL Query Rules ##########")
 
-	qr, err := db.Query("select * from mysql_query_rules")
+	qr, err := db.Query("select rule_id,active,username,schemaname,digest,match_digest,match_pattern,negate_match_pattern,replace_pattern,destination_hostgroup,apply,comment from mysql_query_rules")
 	if err != nil {
 		panic(err)
 	}
