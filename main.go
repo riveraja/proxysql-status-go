@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -19,6 +20,12 @@ func main() {
 	//	log.Fatal(err)
 	//}
 	//defer writeFile.Close()
+
+	// Declare flags
+	fStats := flag.Bool("stats", false, "-stats: Generate stats data")
+
+	flag.Parse()
+	// End declare flags
 
 	db, err := sql.Open("mysql", "admin:admin@tcp(127.0.0.1:6032)/main")
 	if err != nil {
@@ -297,7 +304,24 @@ func main() {
 		fmt.Printf("%s: %s\n", name, val)
 	}
 
+	if *fStats == true {
+		myStats()
+	}
+
+	fmt.Println("\n#### End ####")
+	//#### Cleanup Section ####
+	//os.Remove("./statusfile.txt")
+}
+
+func myStats() {
+
 	fmt.Println("\n########## ProxySQL Stats MySQL Connection Pool ##########")
+
+	db, err := sql.Open("mysql", "admin:admin@tcp(127.0.0.1:6032)/main")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
 
 	sscpl, err := db.Query("SELECT hostgroup, srv_host, status, ConnUsed, ConnFree, ConnOK, ConnERR FROM stats_mysql_connection_pool WHERE ConnUsed+ConnFree > 0 ORDER BY hostgroup, srv_host;")
 	if err != nil {
@@ -316,7 +340,4 @@ func main() {
 	}
 	cpl.Print()
 
-	fmt.Println("\n#### End ####")
-	//#### Cleanup Section ####
-	//os.Remove("./statusfile.txt")
 }
