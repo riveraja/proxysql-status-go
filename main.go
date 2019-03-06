@@ -306,6 +306,8 @@ func main() {
 
 	if *fStats == true {
 		myStats()
+	} else {
+		return nil
 	}
 
 	fmt.Println("\n#### End ####")
