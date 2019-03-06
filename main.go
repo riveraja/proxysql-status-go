@@ -299,7 +299,7 @@ func main() {
 
 	fmt.Println("\n########## ProxySQL Stats MySQL Connection Pool ##########")
 
-	sscpl, err := db.Query("SELECT hostgroup, srv_host, status, ConnUsed, ConnFree, ConnOK, ConnERR FROM stats_mysql_connection_pool WHERE ConnUsed+ConnFree > 0 ORDER BY hg, srv_host;")
+	sscpl, err := db.Query("SELECT hostgroup, srv_host, status, ConnUsed, ConnFree, ConnOK, ConnERR FROM stats_mysql_connection_pool WHERE ConnUsed+ConnFree > 0 ORDER BY hostgroup, srv_host;")
 	if err != nil {
 		log.Fatal(err)
 	}
