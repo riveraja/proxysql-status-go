@@ -297,6 +297,25 @@ func main() {
 		fmt.Printf("%s: %s\n", name, val)
 	}
 
+	fmt.Println("\n########## ProxySQL Stats MySQL Connection Pool ##########")
+
+	sscpl, err := db.Query("SELECT hostgroup, srv_host, status, ConnUsed, ConnFree, ConnOK, ConnERR FROM stats_mysql_connection_pool WHERE ConnUsed+ConnFree > 0 ORDER BY hg, srv_host;")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	cpl := tabby.New()
+	cpl.AddHeader("HG", "Srv Host", "Status", "ConnUsed", "ConnFree", "ConnOK", "ConnERR")
+	for sscpl.Next() {
+		var hostgroup, connUsed, connFree, connOK, connERR int
+		var srvHost, status string
+		if err := sscpl.Scan(&hostgroup, &srvHost, &status, &connUsed, &connFree, &connOK, &connERR); err != nil {
+			panic(err)
+		}
+		cpl.AddLine(hostgroup, srvHost, status, connUsed, connFree, connOK, connERR)
+	}
+	cpl.Print()
+
 	fmt.Println("\n#### End ####")
 	//#### Cleanup Section ####
 	//os.Remove("./statusfile.txt")
