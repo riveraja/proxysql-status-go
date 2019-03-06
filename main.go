@@ -23,6 +23,7 @@ func main() {
 
 	// Declare flags
 	fStats := flag.Bool("stats", false, "-stats: Generate stats data")
+	fGR := flag.Bool("groupreplication", false, "-groupreplication: Show Group Replication HostGroups")
 
 	flag.Parse()
 	// End declare flags
@@ -217,25 +218,9 @@ func main() {
 
 	s.Print()
 
-	fmt.Println("\n########## MySQL Group Replication Hostgroups ##########")
-
-	grhg, err := db.Query("select * from runtime_mysql_group_replication_hostgroups")
-	if err != nil {
-		panic(err)
+	if *fGR == true {
+		haveGR()
 	}
-	defer grhg.Close()
-
-	g := tabby.New()
-	g.AddHeader("Writer HG", "Backup Writer HG", "Reader HG", "Offline HG", "Active", "Max Writers", "Writer is reader", "Max Trx Behind", "Comment")
-	for grhg.Next() {
-		var writehg, bkwritehg, readerhg, offlinehg, active, maxwriters, wrrd, maxtrx int
-		var comment string
-		if err := grhg.Scan(&writehg, &bkwritehg, &readerhg, &offlinehg, &active, &maxwriters, &wrrd, &maxtrx, &comment); err != nil {
-			panic(err)
-		}
-		g.AddLine(writehg, bkwritehg, readerhg, offlinehg, active, maxwriters, wrrd, maxtrx, comment)
-	}
-	g.Print()
 
 	fmt.Println("\n########## MySQL Query Rules ##########")
 
@@ -339,5 +324,35 @@ func myStats() {
 		cpl.AddLine(hostgroup, srvHost, status, connUsed, connFree, connOK, connERR)
 	}
 	cpl.Print()
+
+}
+
+func haveGR() {
+
+	fmt.Println("\n########## MySQL Group Replication Hostgroups ##########")
+
+	db, err := sql.Open("mysql", "admin:admin@tcp(127.0.0.1:6032)/main")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	grhg, err := db.Query("select * from runtime_mysql_group_replication_hostgroups")
+	if err != nil {
+		panic(err)
+	}
+	defer grhg.Close()
+
+	g := tabby.New()
+	g.AddHeader("Writer HG", "Backup Writer HG", "Reader HG", "Offline HG", "Active", "Max Writers", "Writer is reader", "Max Trx Behind", "Comment")
+	for grhg.Next() {
+		var writehg, bkwritehg, readerhg, offlinehg, active, maxwriters, wrrd, maxtrx int
+		var comment string
+		if err := grhg.Scan(&writehg, &bkwritehg, &readerhg, &offlinehg, &active, &maxwriters, &wrrd, &maxtrx, &comment); err != nil {
+			panic(err)
+		}
+		g.AddLine(writehg, bkwritehg, readerhg, offlinehg, active, maxwriters, wrrd, maxtrx, comment)
+	}
+	g.Print()
 
 }
