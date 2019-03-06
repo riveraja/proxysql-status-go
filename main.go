@@ -307,7 +307,7 @@ func main() {
 	if *fStats == true {
 		myStats()
 	} else {
-		return nil
+		fmt.Println("\n########## ProxySQL Stats MySQL Connection Pool ##########")
 	}
 
 	fmt.Println("\n#### End ####")
