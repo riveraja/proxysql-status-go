@@ -88,22 +88,6 @@ func main() {
 
 	fmt.Printf("MySQL Servers:   %d / %d\n", imysqlserverCount, iruntimemysqlserverCount)
 
-	fmt.Println("\n########## ProxySQL Global Variables ##########")
-
-	rows, err := db.Query("select * from runtime_global_variables where variable_name like 'mysql-%'")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var name, val string
-		if err := rows.Scan(&name, &val); err != nil {
-			panic(err)
-		}
-		fmt.Printf("%s: %s\n", name, val)
-	}
-
 	fmt.Println("\n########## ProxySQL MySQL Servers ##########")
 
 	srows, err := db.Query("select hostgroup_id,hostname,port,status,weight,compression,max_connections,max_replication_lag,use_ssl,max_latency_ms,comment from runtime_mysql_servers order by hostgroup_id")
@@ -296,6 +280,22 @@ func main() {
 		q.AddLine(ruleID, actve, userName, schemaName, digest, matchDigest, matchPattern, nmatchPattern, replacePattern, destHg, mapply, mcomment)
 	}
 	q.Print()
+
+	fmt.Println("\n########## ProxySQL Global Variables ##########")
+
+	rows, err := db.Query("select * from runtime_global_variables where variable_name like 'mysql-%'")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var name, val string
+		if err := rows.Scan(&name, &val); err != nil {
+			panic(err)
+		}
+		fmt.Printf("%s: %s\n", name, val)
+	}
 
 	fmt.Println("\n#### End ####")
 	//#### Cleanup Section ####
