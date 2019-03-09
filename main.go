@@ -12,6 +12,8 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
+var db *sql.DB
+
 func main() {
 	//os.Remove("./test.txt")
 
@@ -20,16 +22,28 @@ func main() {
 	//	log.Fatal(err)
 	//}
 	//defer writeFile.Close()
+	var userName, passwd string
+	var sPort int
 
 	// Declare flags
-	fStats := flag.Bool("stats", false, "-stats: Generate stats data")
-	fGR := flag.Bool("groupreplication", false, "-groupreplication: Show Group Replication HostGroups")
+	fStats := flag.Bool("stats", false, "Generate stats data")
+	fGR := flag.Bool("groupreplication", false, "Show Group Replication HostGroups")
+	flag.StringVar(&userName, "user", "admin", "ProxySQL username")
+	flag.StringVar(&passwd, "password", "admin", "ProxySQL password")
+	flag.IntVar(&sPort, "port", 6032, "ProxySQL port")
 
 	flag.Parse()
 	// End declare flags
 
-	db, err := sql.Open("mysql", "admin:admin@tcp(127.0.0.1:6032)/main")
+	dsn := fmt.Sprintf("%s:%s@tcp(127.0.0.1:%d)/main", userName, passwd, sPort)
+
+	var err error
+
+	db, err := sql.Open("mysql", dsn)
 	if err != nil {
+		log.Fatal(err)
+	}
+	if err = db.Ping(); err != nil {
 		log.Fatal(err)
 	}
 	defer db.Close()
@@ -65,8 +79,8 @@ func main() {
 
 	timeNow := time.Now()
 	fmt.Println("########## ProxySQL Summary Report ##########")
-	fmt.Printf("Date/Time:             %s\n", timeNow.Format(time.RFC1123))
-	fmt.Printf("Hostname:              %s\n", hostName)
+	fmt.Printf("Date/Time:       %s\n", timeNow.Format(time.RFC1123))
+	fmt.Printf("Hostname:        %s\n", hostName)
 
 	var imysqluserCount, iruntimemysqluserCount, imysqlserverCount, iruntimemysqlserverCount int
 
@@ -104,11 +118,11 @@ func main() {
 	}
 	defer srows.Close()
 
+	var hid, port, wt, comp, maxcon, maxrepl, usessl, maxlat int
+	var hname, st, comment string
 	t := tabby.New()
 	t.AddHeader("HG", "Hostname", "Port", "Status", "Weight", "Compression", "Max Conn", "Max Repl Lag", "Use SSL", "Max Latency", "Comment")
 	for srows.Next() {
-		var hid, port, wt, comp, maxcon, maxrepl, usessl, maxlat int
-		var hname, st, comment string
 		if err := srows.Scan(&hid, &hname, &port, &st, &wt, &comp, &maxcon, &maxrepl, &usessl, &maxlat, &comment); err != nil {
 			panic(err)
 		}
@@ -125,13 +139,13 @@ func main() {
 	}
 	defer irows.Close()
 
+	var uname, defHG string
+	var defSchema sql.NullString
+	var ndefSchema string
+	var active, useSSL, schemaLocked, trxPersistent, fastFWD, backend, frontend, maxconn int
 	m := tabby.New()
 	m.AddHeader("Username", "Active", "Use SSL", "Default HG", "Default Schema", "Schema Locked", "Trx Persistent", "Fast Fwd", "Backend", "Frontend", "Max Conn")
 	for irows.Next() {
-		var uname, defHG string
-		var defSchema sql.NullString
-		var ndefSchema string
-		var active, useSSL, schemaLocked, trxPersistent, fastFWD, backend, frontend, maxconn int
 		if err := irows.Scan(&uname, &active, &useSSL, &defHG, &defSchema, &schemaLocked, &trxPersistent, &fastFWD, &backend, &frontend, &maxconn); err != nil {
 			panic(err)
 		}
@@ -153,10 +167,10 @@ func main() {
 	}
 	defer sched.Close()
 
+	var id, intervalMS int
+	var filename, narg1, narg2, narg3, narg4, narg5 string
+	var arg1, arg2, arg3, arg4, arg5 sql.NullString
 	for sched.Next() {
-		var id, active, intervalMS int
-		var filename, comment, narg1, narg2, narg3, narg4, narg5 string
-		var arg1, arg2, arg3, arg4, arg5 sql.NullString
 		if err := sched.Scan(&id, &active, &intervalMS, &filename, &arg1, &arg2, &arg3, &arg4, &arg5, &comment); err != nil {
 			panic(err)
 		}
@@ -205,11 +219,10 @@ func main() {
 	}
 	defer rhg.Close()
 
+	var writehg, readhg int
 	s := tabby.New()
 	s.AddHeader("Writer HG", "Reader HG", "Comment")
 	for rhg.Next() {
-		var writehg, readhg int
-		var comment string
 		if err := rhg.Scan(&writehg, &readhg, &comment); err != nil {
 			panic(err)
 		}
@@ -230,12 +243,12 @@ func main() {
 	}
 	defer qr.Close()
 
+	var ruleID, actve, nmatchPattern, destHg, mapply int
+	var schemaName, digest, matchDigest, matchPattern, replacePattern, mcomment string
+	var schemaNamex, digestx, matchDigestx, matchPatternx, replacePatternx, mcommentx sql.NullString
 	q := tabby.New()
 	q.AddHeader("RuleID", "Active", "User", "Schema", "Digest", "MatchDigest", "MatchPattern", "NegatePattern", "ReplacePattern", "DestHG", "Apply", "Comment")
 	for qr.Next() {
-		var ruleID, actve, nmatchPattern, destHg, mapply int
-		var userName, schemaName, digest, matchDigest, matchPattern, replacePattern, mcomment string
-		var schemaNamex, digestx, matchDigestx, matchPatternx, replacePatternx, mcommentx sql.NullString
 		if err := qr.Scan(&ruleID, &actve, &userName, &schemaNamex, &digestx, &matchDigestx, &matchPatternx, &nmatchPattern, &replacePatternx, &destHg, &mapply, &mcommentx); err != nil {
 			panic(err)
 		}
@@ -281,8 +294,8 @@ func main() {
 	}
 	defer rows.Close()
 
+	var name, val string
 	for rows.Next() {
-		var name, val string
 		if err := rows.Scan(&name, &val); err != nil {
 			panic(err)
 		}
@@ -302,22 +315,22 @@ func myStats() {
 
 	fmt.Println("\n########## ProxySQL Stats MySQL Connection Pool ##########")
 
-	db, err := sql.Open("mysql", "admin:admin@tcp(127.0.0.1:6032)/main")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
+	//	db, err := sql.Open("mysql", "admin:admin@tcp(127.0.0.1:6032)/main")
+	//	if err != nil {
+	//		log.Fatal(err)
+	//	}
+	//	defer db.Close()
 
 	sscpl, err := db.Query("SELECT hostgroup, srv_host, status, ConnUsed, ConnFree, ConnOK, ConnERR FROM stats_mysql_connection_pool WHERE ConnUsed+ConnFree > 0 ORDER BY hostgroup, srv_host;")
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	var hostgroup, connUsed, connFree, connOK, connERR int
+	var srvHost, status string
 	cpl := tabby.New()
 	cpl.AddHeader("HG", "Srv Host", "Status", "ConnUsed", "ConnFree", "ConnOK", "ConnERR")
 	for sscpl.Next() {
-		var hostgroup, connUsed, connFree, connOK, connERR int
-		var srvHost, status string
 		if err := sscpl.Scan(&hostgroup, &srvHost, &status, &connUsed, &connFree, &connOK, &connERR); err != nil {
 			panic(err)
 		}
@@ -331,11 +344,11 @@ func haveGR() {
 
 	fmt.Println("\n########## MySQL Group Replication Hostgroups ##########")
 
-	db, err := sql.Open("mysql", "admin:admin@tcp(127.0.0.1:6032)/main")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
+	//	db, err := sql.Open("mysql", "admin:admin@tcp(127.0.0.1:6032)/main")
+	//	if err != nil {
+	//		log.Fatal(err)
+	//	}
+	//	defer db.Close()
 
 	grhg, err := db.Query("select * from runtime_mysql_group_replication_hostgroups")
 	if err != nil {
@@ -343,11 +356,11 @@ func haveGR() {
 	}
 	defer grhg.Close()
 
+	var writehg, bkwritehg, readerhg, offlinehg, active, maxwriters, wrrd, maxtrx int
+	var comment string
 	g := tabby.New()
 	g.AddHeader("Writer HG", "Backup Writer HG", "Reader HG", "Offline HG", "Active", "Max Writers", "Writer is reader", "Max Trx Behind", "Comment")
 	for grhg.Next() {
-		var writehg, bkwritehg, readerhg, offlinehg, active, maxwriters, wrrd, maxtrx int
-		var comment string
 		if err := grhg.Scan(&writehg, &bkwritehg, &readerhg, &offlinehg, &active, &maxwriters, &wrrd, &maxtrx, &comment); err != nil {
 			panic(err)
 		}
