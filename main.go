@@ -290,11 +290,11 @@ func main() {
 	}
 
 	if *boolGR == true || *boolAll == true {
-		haveGR()
+		showGR()
 	}
 
 	if *boolStats == true || *boolAll == true {
-		myStats()
+		showStats()
 	}
 
 	if *boolFiles == true || *boolAll == true {
@@ -306,7 +306,7 @@ func main() {
 	//os.Remove("./statusfile.txt")
 }
 
-func myStats() {
+func showStats() {
 
 	fmt.Println("\n########## ProxySQL Stats MySQL Connection Pool ##########")
 
@@ -328,7 +328,7 @@ func myStats() {
 
 }
 
-func haveGR() {
+func showGR() {
 
 	fmt.Println("\n########## MySQL Group Replication Hostgroups ##########")
 
