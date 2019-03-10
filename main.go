@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"time"
@@ -40,6 +41,7 @@ func main() {
 	// Declare flags
 	fStats := flag.Bool("stats", false, "Generate stats data")
 	fGR := flag.Bool("groupreplication", false, "Show Group Replication HostGroups")
+	ff := flag.Bool("files", false, "Show file contents")
 	flag.StringVar(&userName, "user", "admin", "ProxySQL username")
 	flag.StringVar(&passwd, "password", "admin", "ProxySQL password")
 	flag.IntVar(&sPort, "port", 6032, "ProxySQL port")
@@ -294,6 +296,10 @@ func main() {
 		myStats()
 	}
 
+	if *ff == true {
+		showFiles()
+	}
+
 	fmt.Println("\n#### End ####")
 	//#### Cleanup Section ####
 	//os.Remove("./statusfile.txt")
@@ -341,4 +347,18 @@ func haveGR() {
 	}
 	g.Print()
 
+}
+
+func showFiles() {
+	m, err := ioutil.ReadFile("/etc/proxysql-admin.cnf")
+	if err != nil {
+		fmt.Printf("Failed to %s\n", err)
+	}
+	fmt.Print(string(m))
+
+	s, err := ioutil.ReadFile("/var/lib/proxysql/host_priority.conf")
+	if err != nil {
+		fmt.Printf("Failed to %s\n", err)
+	}
+	fmt.Print(string(s))
 }
