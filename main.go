@@ -325,6 +325,7 @@ func myStats() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer sscpl.Close()
 
 	var hostgroup, connUsed, connFree, connOK, connERR int
 	var srvHost, status string
