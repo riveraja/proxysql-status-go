@@ -354,12 +354,14 @@ func showFiles() {
 
 	fmt.Println("\n########## ProxySQL Files ##########")
 
+	fmt.Println("File: /etc/proxysql-admin.cnf")
 	m, err := ioutil.ReadFile("/etc/proxysql-admin.cnf")
 	if err != nil {
 		fmt.Printf("Failed to %s\n", err)
 	}
 	fmt.Print(string(m))
 
+	fmt.Println("File: /var/lib/proxysql/host_priority.conf")
 	s, err := ioutil.ReadFile("/var/lib/proxysql/host_priority.conf")
 	if err != nil {
 		fmt.Printf("Failed to %s\n", err)
