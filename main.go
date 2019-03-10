@@ -14,6 +14,18 @@ import (
 
 var db *sql.DB
 
+func check(e error) {
+	if e != nil {
+		log.Fatal(e)
+	}
+}
+
+func pcheck(e error) {
+	if e != nil {
+		panic(e)
+	}
+}
+
 func main() {
 	//os.Remove("./test.txt")
 
@@ -40,41 +52,29 @@ func main() {
 	var err error
 
 	db, err = sql.Open("mysql", dsn)
-	if err != nil {
-		log.Fatal(err)
-	}
+	check(err)
 	if err = db.Ping(); err != nil {
 		log.Fatal(err)
 	}
 	defer db.Close()
 
 	hostName, err := os.Hostname()
-	if err != nil {
-		log.Fatal(err)
-	}
+	check(err)
 
 	mysqlserverCount, err := db.Query("select count(*) from mysql_servers")
-	if err != nil {
-		log.Fatal(err)
-	}
+	check(err)
 	defer mysqlserverCount.Close()
 
 	mysqluserCount, err := db.Query("select count(*) from mysql_users")
-	if err != nil {
-		log.Fatal(err)
-	}
+	check(err)
 	defer mysqluserCount.Close()
 
 	runtimemysqluserCount, err := db.Query("select count(*) from runtime_mysql_users")
-	if err != nil {
-		log.Fatal(err)
-	}
+	check(err)
 	defer runtimemysqluserCount.Close()
 
 	runtimemysqlserverCount, err := db.Query("select count(*) from runtime_mysql_servers")
-	if err != nil {
-		log.Fatal(err)
-	}
+	check(err)
 	defer runtimemysqlserverCount.Close()
 
 	timeNow := time.Now()
@@ -113,9 +113,7 @@ func main() {
 	fmt.Println("\n########## ProxySQL MySQL Servers ##########")
 
 	srows, err := db.Query("select hostgroup_id,hostname,port,status,weight,compression,max_connections,max_replication_lag,use_ssl,max_latency_ms,comment from runtime_mysql_servers order by hostgroup_id")
-	if err != nil {
-		log.Fatal(err)
-	}
+	check(err)
 	defer srows.Close()
 
 	var hid, port, wt, comp, maxcon, maxrepl, usessl, maxlat int
@@ -134,9 +132,7 @@ func main() {
 	fmt.Println("\n########## ProxySQL MySQL Users ##########")
 
 	irows, err := db.Query("select username,active,use_ssl,default_hostgroup,default_schema,schema_locked,transaction_persistent,fast_forward,backend,frontend,max_connections from runtime_mysql_users")
-	if err != nil {
-		panic(err)
-	}
+	pcheck(err)
 	defer irows.Close()
 
 	var uname, defHG string
@@ -162,9 +158,7 @@ func main() {
 	fmt.Println("\n########## ProxySQL Scheduler ##########")
 
 	sched, err := db.Query("select id, active, interval_ms, filename, arg1, arg2, arg3, arg4, arg5, comment from runtime_scheduler")
-	if err != nil {
-		panic(err)
-	}
+	pcheck(err)
 	defer sched.Close()
 
 	var id, intervalMS int
@@ -214,9 +208,7 @@ func main() {
 	fmt.Println("\n########## MySQL Replication Hostgroups ##########")
 
 	rhg, err := db.Query("select * from runtime_mysql_replication_hostgroups")
-	if err != nil {
-		panic(err)
-	}
+	pcheck(err)
 	defer rhg.Close()
 
 	var writehg, readhg int
@@ -238,9 +230,7 @@ func main() {
 	fmt.Println("\n########## MySQL Query Rules ##########")
 
 	qr, err := db.Query("select rule_id,active,username,schemaname,digest,match_digest,match_pattern,negate_match_pattern,replace_pattern,destination_hostgroup,apply,comment from runtime_mysql_query_rules")
-	if err != nil {
-		panic(err)
-	}
+	pcheck(err)
 	defer qr.Close()
 
 	var ruleID, actve, nmatchPattern, destHg, mapply int
@@ -289,9 +279,7 @@ func main() {
 	fmt.Println("\n########## ProxySQL Global Variables ##########")
 
 	rows, err := db.Query("select * from runtime_global_variables where variable_name like 'mysql-%'")
-	if err != nil {
-		log.Fatal(err)
-	}
+	check(err)
 	defer rows.Close()
 
 	var name, val string
@@ -315,16 +303,8 @@ func myStats() {
 
 	fmt.Println("\n########## ProxySQL Stats MySQL Connection Pool ##########")
 
-	//	db, err := sql.Open("mysql", "admin:admin@tcp(127.0.0.1:6032)/main")
-	//	if err != nil {
-	//		log.Fatal(err)
-	//	}
-	//	defer db.Close()
-
-	sscpl, err := db.Query("SELECT hostgroup, srv_host, status, ConnUsed, ConnFree, ConnOK, ConnERR FROM stats.stats_mysql_connection_pool WHERE ConnUsed+ConnFree > 0 ORDER BY hostgroup, srv_host;")
-	if err != nil {
-		log.Fatal(err)
-	}
+	sscpl, err := db.Query("SELECT hostgroup, srv_host, status, ConnUsed, ConnFree, ConnOK, ConnERR FROM stats.stats_mysql_connection_pool WHERE ConnUsed+ConnFree > 0 ORDER BY hostgroup, srv_host")
+	check(err)
 	defer sscpl.Close()
 
 	var hostgroup, connUsed, connFree, connOK, connERR int
@@ -345,16 +325,8 @@ func haveGR() {
 
 	fmt.Println("\n########## MySQL Group Replication Hostgroups ##########")
 
-	//	db, err := sql.Open("mysql", "admin:admin@tcp(127.0.0.1:6032)/main")
-	//	if err != nil {
-	//		log.Fatal(err)
-	//	}
-	//	defer db.Close()
-
 	grhg, err := db.Query("select * from runtime_mysql_group_replication_hostgroups")
-	if err != nil {
-		panic(err)
-	}
+	pcheck(err)
 	defer grhg.Close()
 
 	var writehg, bkwritehg, readerhg, offlinehg, active, maxwriters, wrrd, maxtrx int
