@@ -95,7 +95,7 @@ func main() {
 		}
 	}
 
-	fmt.Printf("MySQL Users:    %d / %d\n", imysqluserCount, iruntimemysqluserCount)
+	fmt.Printf("MySQL Users:     %d / %d\n", imysqluserCount, iruntimemysqluserCount)
 
 	for mysqlserverCount.Next() {
 		if err := mysqlserverCount.Scan(&imysqlserverCount); err != nil {
