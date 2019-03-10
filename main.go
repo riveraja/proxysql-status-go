@@ -350,6 +350,9 @@ func haveGR() {
 }
 
 func showFiles() {
+
+	fmt.Println("\n########## ProxySQL Files ##########")
+
 	m, err := ioutil.ReadFile("/etc/proxysql-admin.cnf")
 	if err != nil {
 		fmt.Printf("Failed to %s\n", err)
