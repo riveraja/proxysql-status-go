@@ -39,7 +39,7 @@ func main() {
 
 	var err error
 
-	db, err := sql.Open("mysql", dsn)
+	db, err = sql.Open("mysql", dsn)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -321,7 +321,7 @@ func myStats() {
 	//	}
 	//	defer db.Close()
 
-	sscpl, err := db.Query("SELECT hostgroup, srv_host, status, ConnUsed, ConnFree, ConnOK, ConnERR FROM stats_mysql_connection_pool WHERE ConnUsed+ConnFree > 0 ORDER BY hostgroup, srv_host;")
+	sscpl, err := db.Query("SELECT hostgroup, srv_host, status, ConnUsed, ConnFree, ConnOK, ConnERR FROM stats.stats_mysql_connection_pool WHERE ConnUsed+ConnFree > 0 ORDER BY hostgroup, srv_host;")
 	if err != nil {
 		log.Fatal(err)
 	}
