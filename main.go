@@ -39,9 +39,10 @@ func main() {
 	var sPort int
 
 	// Declare flags
-	fStats := flag.Bool("stats", false, "Generate stats data")
-	fGR := flag.Bool("groupreplication", false, "Show Group Replication HostGroups")
-	ff := flag.Bool("files", false, "Show file contents")
+	boolStats := flag.Bool("stats", false, "Generate stats data")
+	boolGR := flag.Bool("groupreplication", false, "Show Group Replication HostGroups")
+	boolFiles := flag.Bool("files", false, "Show file contents")
+	boolAll := flag.Bool("all", false, "Show all")
 	flag.StringVar(&userName, "user", "admin", "ProxySQL username")
 	flag.StringVar(&passwd, "password", "admin", "ProxySQL password")
 	flag.IntVar(&sPort, "port", 6032, "ProxySQL port")
@@ -225,10 +226,6 @@ func main() {
 
 	s.Print()
 
-	if *fGR == true {
-		haveGR()
-	}
-
 	fmt.Println("\n########## MySQL Query Rules ##########")
 
 	qr, err := db.Query("select rule_id,active,username,schemaname,digest,match_digest,match_pattern,negate_match_pattern,replace_pattern,destination_hostgroup,apply,comment from runtime_mysql_query_rules")
@@ -292,11 +289,15 @@ func main() {
 		fmt.Printf("%s: %s\n", name, val)
 	}
 
-	if *fStats == true {
+	if *boolGR == true || *boolAll == true {
+		haveGR()
+	}
+
+	if *boolStats == true || *boolAll == true {
 		myStats()
 	}
 
-	if *ff == true {
+	if *boolFiles == true || *boolAll == true {
 		showFiles()
 	}
 
