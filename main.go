@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/cheynewallace/tabby"
@@ -14,6 +15,7 @@ import (
 )
 
 var db *sql.DB
+var queryString, tableType string
 
 func check(e error) {
 	if e != nil {
@@ -43,6 +45,7 @@ func main() {
 	boolGR := flag.Bool("groupreplication", false, "Show Group Replication HostGroups")
 	boolFiles := flag.Bool("files", false, "Show file contents")
 	boolAll := flag.Bool("all", false, "Show all")
+	boolRuntime := flag.Bool("runtime", false, "Show runtime tables only")
 	flag.StringVar(&userName, "user", "admin", "ProxySQL username")
 	flag.StringVar(&passwd, "password", "admin", "ProxySQL password")
 	flag.IntVar(&sPort, "port", 6032, "ProxySQL port")
@@ -51,6 +54,8 @@ func main() {
 	// End declare flags
 
 	dsn := fmt.Sprintf("%s:%s@tcp(127.0.0.1:%d)/main", userName, passwd, sPort)
+
+	strVal := strconv.FormatBool(*boolRuntime)
 
 	var err error
 
@@ -115,7 +120,10 @@ func main() {
 
 	fmt.Println("\n########## ProxySQL MySQL Servers ##########")
 
-	srows, err := db.Query("select hostgroup_id,hostname,port,status,weight,compression,max_connections,max_replication_lag,use_ssl,max_latency_ms,comment from runtime_mysql_servers order by hostgroup_id")
+	tableType = funcTabletype(strVal)
+
+	queryString = fmt.Sprintf("select hostgroup_id,hostname,port,status,weight,compression,max_connections,max_replication_lag,use_ssl,max_latency_ms,comment from %smysql_servers order by hostgroup_id", tableType)
+	srows, err := db.Query(queryString)
 	check(err)
 	defer srows.Close()
 
@@ -134,7 +142,10 @@ func main() {
 
 	fmt.Println("\n########## ProxySQL MySQL Users ##########")
 
-	irows, err := db.Query("select username,active,use_ssl,default_hostgroup,default_schema,schema_locked,transaction_persistent,fast_forward,backend,frontend,max_connections from runtime_mysql_users")
+	tableType = funcTabletype(strVal)
+
+	queryString = fmt.Sprintf("select username,active,use_ssl,default_hostgroup,default_schema,schema_locked,transaction_persistent,fast_forward,backend,frontend,max_connections from %smysql_users", tableType)
+	irows, err := db.Query(queryString)
 	pcheck(err)
 	defer irows.Close()
 
@@ -160,7 +171,10 @@ func main() {
 
 	fmt.Println("\n########## ProxySQL Scheduler ##########")
 
-	sched, err := db.Query("select id, active, interval_ms, filename, arg1, arg2, arg3, arg4, arg5, comment from runtime_scheduler")
+	tableType = funcTabletype(strVal)
+
+	queryString = fmt.Sprintf("select id, active, interval_ms, filename, arg1, arg2, arg3, arg4, arg5, comment from %sscheduler", tableType)
+	sched, err := db.Query(queryString)
 	pcheck(err)
 	defer sched.Close()
 
@@ -205,12 +219,15 @@ func main() {
 		fmt.Printf("\nArg3:           %s", narg3)
 		fmt.Printf("\nArg4:           %s", narg4)
 		fmt.Printf("\nArg5:           %s", narg5)
-		fmt.Printf("\nComment:        %s", comment)
+		fmt.Printf("\nComment:        %s\n", comment)
 	}
 
 	fmt.Println("\n########## MySQL Replication Hostgroups ##########")
 
-	rhg, err := db.Query("select * from runtime_mysql_replication_hostgroups")
+	tableType = funcTabletype(strVal)
+
+	queryString = fmt.Sprintf("select * from %smysql_replication_hostgroups", tableType)
+	rhg, err := db.Query(queryString)
 	pcheck(err)
 	defer rhg.Close()
 
@@ -228,7 +245,10 @@ func main() {
 
 	fmt.Println("\n########## MySQL Query Rules ##########")
 
-	qr, err := db.Query("select rule_id,active,username,schemaname,digest,match_digest,match_pattern,negate_match_pattern,replace_pattern,destination_hostgroup,apply,comment from runtime_mysql_query_rules")
+	tableType = funcTabletype(strVal)
+
+	queryString = fmt.Sprintf("select rule_id,active,username,schemaname,digest,match_digest,match_pattern,negate_match_pattern,replace_pattern,destination_hostgroup,apply,comment from %smysql_query_rules", tableType)
+	qr, err := db.Query(queryString)
 	pcheck(err)
 	defer qr.Close()
 
@@ -277,7 +297,10 @@ func main() {
 
 	fmt.Println("\n########## ProxySQL Global Variables ##########")
 
-	rows, err := db.Query("select * from runtime_global_variables where variable_name like 'mysql-%'")
+	tableType = funcTabletype(strVal)
+
+	queryString = fmt.Sprintf("select * from %sglobal_variables", tableType)
+	rows, err := db.Query(queryString)
 	check(err)
 	defer rows.Close()
 
@@ -290,7 +313,7 @@ func main() {
 	}
 
 	if *boolGR == true || *boolAll == true {
-		showGR()
+		showGR(strVal)
 	}
 
 	if *boolStats == true || *boolAll == true {
@@ -328,11 +351,14 @@ func showStats() {
 
 }
 
-func showGR() {
+func showGR(r string) {
 
 	fmt.Println("\n########## MySQL Group Replication Hostgroups ##########")
 
-	grhg, err := db.Query("select * from runtime_mysql_group_replication_hostgroups")
+	tableType = funcTabletype(r)
+
+	queryString = fmt.Sprintf("select * from %smysql_group_replication_hostgroups", tableType)
+	grhg, err := db.Query(queryString)
 	pcheck(err)
 	defer grhg.Close()
 
@@ -354,17 +380,24 @@ func showFiles() {
 
 	fmt.Println("\n########## ProxySQL Files ##########")
 
-	fmt.Println("File: /etc/proxysql-admin.cnf")
+	fmt.Println("\nFile: /etc/proxysql-admin.cnf")
 	m, err := ioutil.ReadFile("/etc/proxysql-admin.cnf")
 	if err != nil {
 		fmt.Printf("Failed to %s\n", err)
 	}
 	fmt.Print(string(m))
 
-	fmt.Println("File: /var/lib/proxysql/host_priority.conf")
+	fmt.Println("\nFile: /var/lib/proxysql/host_priority.conf")
 	s, err := ioutil.ReadFile("/var/lib/proxysql/host_priority.conf")
 	if err != nil {
 		fmt.Printf("Failed to %s\n", err)
 	}
 	fmt.Print(string(s))
+}
+
+func funcTabletype(r string) string {
+	if r == "true" {
+		return "runtime_"
+	}
+	return ""
 }
