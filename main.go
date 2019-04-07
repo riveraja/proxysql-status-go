@@ -219,7 +219,7 @@ func main() {
 		fmt.Printf("\nArg3:           %s", narg3)
 		fmt.Printf("\nArg4:           %s", narg4)
 		fmt.Printf("\nArg5:           %s", narg5)
-		fmt.Printf("\nComment:        %s", comment)
+		fmt.Printf("\nComment:        %s\n", comment)
 	}
 
 	fmt.Println("\n########## MySQL Replication Hostgroups ##########")
