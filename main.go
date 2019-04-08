@@ -323,21 +323,38 @@ func showStats() {
 
 	fmt.Println("\n########## ProxySQL Stats MySQL Connection Pool ##########")
 
-	sscpl, err := db.Query("SELECT hostgroup, srv_host, status, ConnUsed, ConnFree, ConnOK, ConnERR FROM stats.stats_mysql_connection_pool WHERE ConnUsed+ConnFree > 0 ORDER BY hostgroup, srv_host")
-	check(err)
-	defer sscpl.Close()
-
-	var hostgroup, connUsed, connFree, connOK, connERR int
+	var hostgroup, connUsed, connFree, connOK, connERR, qries, bytesSent, bytesRecv, lat int
 	var srvHost, status string
-	cpl := tabby.New()
-	cpl.AddHeader("HG", "Srv Host", "Status", "ConnUsed", "ConnFree", "ConnOK", "ConnERR")
-	for sscpl.Next() {
-		if err := sscpl.Scan(&hostgroup, &srvHost, &status, &connUsed, &connFree, &connOK, &connERR); err != nil {
+
+	queryString = fmt.Sprintln("SELECT hostgroup, srv_host, status, ConnUsed, ConnFree, ConnOK, ConnERR FROM stats.stats_mysql_connection_pool WHERE ConnUsed+ConnFree > 0 ORDER BY hostgroup, srv_host")
+	scpl1, err := db.Query(queryString)
+	check(err)
+	defer scpl1.Close()
+
+	cpl1 := tabby.New()
+	cpl1.AddHeader("HG", "Srv Host", "Status", "ConnUsed", "ConnFree", "ConnOK", "ConnERR")
+	for scpl1.Next() {
+		if err := scpl1.Scan(&hostgroup, &srvHost, &status, &connUsed, &connFree, &connOK, &connERR); err != nil {
 			panic(err)
 		}
-		cpl.AddLine(hostgroup, srvHost, status, connUsed, connFree, connOK, connERR)
+		cpl1.AddLine(hostgroup, srvHost, status, connUsed, connFree, connOK, connERR)
 	}
-	cpl.Print()
+	cpl1.Print()
+
+	queryString = fmt.Sprintln("SELECT hostgroup, srv_host, Queries, Bytes_data_sent, Bytes_data_recv, Latency_us FROM stats_mysql_connection_pool WHERE ConnUsed+ConnFree > 0 ORDER BY hostgroup, srv_host")
+	scpl2, err := db.Query(queryString)
+	check(err)
+	defer scpl2.Close()
+
+	cpl2 := tabby.New()
+	cpl2.AddHeader("HG", "Srv Host", "Queries", "Bytes Sent", "Bytes Recv", "Latency")
+	for scpl2.Next() {
+		if err := scpl2.Scan(&hostgroup, &srvHost, &qries, &bytesSent, &bytesRecv, &lat); err != nil {
+			panic(err)
+		}
+		cpl2.AddLine(hostgroup, srvHost, qries, bytesSent, bytesRecv, lat)
+	}
+	cpl2.Print()
 
 }
 
