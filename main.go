@@ -142,8 +142,6 @@ func main() {
 
 	fmt.Println("\n########## ProxySQL MySQL Users ##########")
 
-	tableType = funcTabletype(strVal)
-
 	queryString = fmt.Sprintf("select username,active,use_ssl,default_hostgroup,default_schema,schema_locked,transaction_persistent,fast_forward,backend,frontend,max_connections from %smysql_users", tableType)
 	irows, err := db.Query(queryString)
 	pcheck(err)
@@ -170,8 +168,6 @@ func main() {
 	m.Print()
 
 	fmt.Println("\n########## ProxySQL Scheduler ##########")
-
-	tableType = funcTabletype(strVal)
 
 	queryString = fmt.Sprintf("select id, active, interval_ms, filename, arg1, arg2, arg3, arg4, arg5, comment from %sscheduler", tableType)
 	sched, err := db.Query(queryString)
@@ -224,8 +220,6 @@ func main() {
 
 	fmt.Println("\n########## MySQL Replication Hostgroups ##########")
 
-	tableType = funcTabletype(strVal)
-
 	queryString = fmt.Sprintf("select * from %smysql_replication_hostgroups", tableType)
 	rhg, err := db.Query(queryString)
 	pcheck(err)
@@ -244,8 +238,6 @@ func main() {
 	s.Print()
 
 	fmt.Println("\n########## MySQL Query Rules ##########")
-
-	tableType = funcTabletype(strVal)
 
 	queryString = fmt.Sprintf("select rule_id,active,username,schemaname,digest,match_digest,match_pattern,negate_match_pattern,replace_pattern,destination_hostgroup,apply,comment from %smysql_query_rules", tableType)
 	qr, err := db.Query(queryString)
@@ -296,8 +288,6 @@ func main() {
 	q.Print()
 
 	fmt.Println("\n########## ProxySQL Global Variables ##########")
-
-	tableType = funcTabletype(strVal)
 
 	queryString = fmt.Sprintf("select * from %sglobal_variables", tableType)
 	rows, err := db.Query(queryString)
