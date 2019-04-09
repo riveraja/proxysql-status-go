@@ -118,6 +118,20 @@ func main() {
 
 	fmt.Printf("MySQL Servers:   %d / %d\n", imysqlserverCount, iruntimemysqlserverCount)
 
+	uptime, err := db.Query("select Variable_Value from stats.stats_mysql_global where Variable_name='ProxySQL_Uptime'")
+	check(err)
+	defer uptime.Close()
+
+	var upTime int
+	for uptime.Next() {
+		if err := uptime.Scan(&upTime); err != nil {
+			panic(err)
+		}
+	}
+
+	uptimeSeconds := upTime
+	fmt.Printf("ProxySQL Uptime: %s", time.Duration(uptimeSeconds)*time.Second)
+
 	fmt.Println("\n########## ProxySQL MySQL Servers ##########")
 
 	tableType = funcTabletype(strVal)
